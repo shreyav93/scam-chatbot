@@ -1,5 +1,3 @@
-# scam-chatbot
-
 # Scam Chatbot
 
 The frontend uses React and Vite. The backend uses Django. Run both locally to test the connection.
