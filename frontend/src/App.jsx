@@ -5,13 +5,13 @@ import viteLogo from './assets/vite.svg'
 import './App.css'
 
 async function getAnswer(question) {
-  await new Promise((resolve) => setTimeout(resolve, 800))
-
-  return {
-    answer:
-      `Demo reponse to your question: "${question}"\n\n` +
-      'The real scam guidance will appear here once the backend is connected.',
-  }
+  const res = await fetch('/api/ask/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  })
+  if (!res.ok) throw new Error('Request failed')
+  return res.json()
 }
 
 export default function App() {
@@ -61,9 +61,8 @@ export default function App() {
       }
 
       const assistantMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        text: data.answer,
+        id: crypto.randomUUID(), role: 'assistant',
+        text: data.answer, sources: data.sources ?? [],
       }
 
       setMessages((previous) => [...previous, assistantMessage])
@@ -104,6 +103,21 @@ export default function App() {
 
         {messages.map((message) => (
           <article key={message.id} className={`message message-${message.role}`}>
+            {message.sources?.length > 0 && (
+              <section aria-label="Sources used for this answer">
+                <h2>Sources</h2>
+                <ol>
+                  {message.sources.map((s) => (
+                    <li key={s.id} value={s.id}>
+                      <a href={s.url} target="_blank" rel="noreferrer">
+                        {s.publisher}: {s.title}
+                      </a>
+                      <details><summary>Show the passage used</summary><p>{s.snippet}</p></details>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
             <strong>
               {message.role === 'user' ? 'You' : 'Scam Support'}
             </strong>
