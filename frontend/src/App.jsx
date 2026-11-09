@@ -1,7 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
 async function getAnswer(question) {
@@ -10,8 +7,9 @@ async function getAnswer(question) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question }),
   })
-  if (!res.ok) throw new Error('Request failed')
-  return res.json()
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data.error || 'Request failed')
+  return data
 }
 
 export default function App() {
@@ -66,12 +64,14 @@ export default function App() {
       }
 
       setMessages((previous) => [...previous, assistantMessage])
-    } catch {
-      setError('We could not get an answer. Your question is ready to try again.')
-      setQuestion(submittedQuestion)
-      setMessages((previous) =>
-        previous.filter((message) => message.id !== userMessage.id),
+    } catch (err) {
+      setError(
+        err.message && err.message !== 'Request failed'
+          ? err.message
+          : 'We could not get an answer. Please try again.',
       )
+      setQuestion(submittedQuestion)
+      setMessages((previous) => previous.filter((m) => m.id !== userMessage.id))
     } finally {
       setIsLoading(false)
     }
@@ -84,7 +84,8 @@ export default function App() {
         <h1>Scam Support Chat</h1>
         <p>Describe or paste a suspicious call, email, or text to see if it is trustworthy.</p>
         <p className="demo-notice">
-          Development demo -- all replies are placeholders for actual responses.
+          This tool points out warning signs. It cannot guarantee a message is safe.
+          Don't paste passwords or account numbers.
         </p>
       </header>
 
@@ -101,31 +102,31 @@ export default function App() {
           </p>
         )}
 
-        {messages.map((message) => (
+                {messages.map((message) => (
           <article key={message.id} className={`message message-${message.role}`}>
+            <strong>{message.role === 'user' ? 'You' : 'Scam Support'}</strong>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{message.text}</p>
             {message.sources?.length > 0 && (
               <section aria-label="Sources used for this answer">
                 <h2>Sources</h2>
                 <ol>
-                  {message.sources.map((s) => (
-                    <li key={s.id} value={s.id}>
-                      <a href={s.url} target="_blank" rel="noreferrer">
-                        {s.publisher}: {s.title}
-                      </a>
-                      <details><summary>Show the passage used</summary><p>{s.snippet}</p></details>
-                    </li>
-                  ))}
+                  {[...message.sources]
+                    .sort((a, b) => Number(b.cited) - Number(a.cited))
+                    .map((s) => (
+                      <li key={s.id} value={s.id}>
+                        <a href={s.url} target="_blank" rel="noreferrer">
+                          {s.publisher}: {s.title}
+                        </a>
+                        {!s.cited && ' (also consulted)'}
+                        <details><summary>Show the passage used</summary><p>{s.snippet}</p></details>
+                      </li>
+                    ))}
                 </ol>
               </section>
             )}
-            <strong>
-              {message.role === 'user' ? 'You' : 'Scam Support'}
-            </strong>
-            <p>{message.text}</p>
           </article>
         ))}
       </section>
-
       <p role="status">
           {isLoading ? 'Checking your question...' : ''}
       </p>
@@ -145,13 +146,11 @@ export default function App() {
           aria-invalid={Boolean(error)}
           aria-describedby={error ? 'question-error' : undefined}
         />
-
         {error && (
           <p id="question-error" className="error" role="alert">
             {error}
           </p>
         )}
-
         <button type="submit" disabled={isLoading}>
           {isLoading ? 'Waiting for an answer...' : 'Send question'}
         </button>

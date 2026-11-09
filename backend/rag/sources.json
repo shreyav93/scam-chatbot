@@ -1,4 +1,23 @@
 [
-  {"title": "How to Avoid a Scam", "publisher": "FTC",
-   "url": "https://consumer.ftc.gov/articles/how-avoid-scam"}
+  {"title": "What are some classic warning signs of possible fraud and scams?", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/ask-cfpb/what-are-some-classic-warning-signs-of-possible-fraud-and-scams-en-2094/",
+   "category": "warning-signs", "channel": "any", "last_reviewed": "2026-11-09"},
+  {"title": "What are some common types of fraud and scams?", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/ask-cfpb/what-are-some-common-types-of-fraud-and-scams-en-2092/",
+   "category": "general", "channel": "any", "last_reviewed": "2026-11-09"},
+  {"title": "How can I protect myself and others from fraud and scams?", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/ask-cfpb/how-can-i-protect-myself-and-others-i-care-about-from-fraud-and-scams-en-1935/",
+   "category": "prevention", "channel": "any", "last_reviewed": "2026-11-09"},
+  {"title": "I think I or someone I know was the victim of a scam. Who can I contact?", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/ask-cfpb/i-think-i-or-someone-i-know-was-the-victim-of-a-scam-or-financial-exploitation-who-can-i-contact-for-help-en-1777/",
+   "category": "after-a-scam", "channel": "any", "last_reviewed": "2026-11-09"},
+  {"title": "Beware of new CFPB imposter scams", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/archive/blog/beware-of-new-cfpb-imposter-scams/",
+   "category": "impersonation", "channel": "any", "last_reviewed": "2026-11-09"},
+  {"title": "Fraud and scams: common issues", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/consumer-tools/fraud/answers/common-issues/",
+   "category": "general", "channel": "any", "last_reviewed": "2026-11-09"},
+  {"title": "Fraud and scams: key terms", "publisher": "CFPB",
+   "url": "https://www.consumerfinance.gov/consumer-tools/fraud/answers/key-terms/",
+   "category": "glossary", "channel": "any", "last_reviewed": "2026-11-09"}
 ]

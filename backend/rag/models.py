@@ -10,3 +10,13 @@ class Source(models.Model):
     active = models.BooleanField(default=True)
     content_hash = models.CharField(max_length=64, blank=True)
     last_ingested = models.DateTimeField(null=True, blank=True)
+
+class Chunk(models.Model):
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, related_name="chunks")
+    position = models.PositiveIntegerField()
+    text = models.TextField()
+    embedding = models.JSONField()
+
+class UsageCounter(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    count = models.PositiveIntegerField(default=0)
