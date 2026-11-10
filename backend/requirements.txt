@@ -1,3 +1,9 @@
 asgiref==3.13.0
 Django==6.1.3
 sqlparse==0.6.1
+numpy
+fastembed
+trafilatura
+requests
+google-genai
+python-dotenv
