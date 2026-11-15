@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
 from rag.views import ask
+from rag import developer_views
 
 
 def health(request):
@@ -28,4 +29,16 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health),
     path("api/ask/", ask),
+    path("api/developer/login/", developer_views.developer_login),
+    path("api/developer/logout/", developer_views.developer_logout),
+    path("api/developer/status/", developer_views.developer_status),
+    path("api/developer/sources/", developer_views.get_sources),
+    path("api/developer/stats/", developer_views.get_dashboard_stats),
+    path("api/developer/csrf/", developer_views.developer_csrf),
+    path("api/developer/sources/", developer_views.get_sources),
+    path("api/developer/sources/add/", developer_views.create_source),
+    path("api/developer/sources/<int:source_id>/", developer_views.update_source),
+    path("api/developer/stats/", developer_views.get_dashboard_stats),
+    path("api/developer/ingest/", developer_views.run_ingestion),
+
 ]

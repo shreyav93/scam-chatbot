@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import DeveloperPage from "./DeveloperPage";
 
 async function getAnswer(question) {
   const res = await fetch('/api/ask/', {
@@ -17,6 +18,7 @@ export default function App() {
   const[messages, setMessages] = useState([])
   const[isLoading, setIsLoading] = useState(false)
   const[error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState("chat");
 
   const conversationEndRef = useRef(null)
 
@@ -89,18 +91,30 @@ export default function App() {
         </p>
       </header>
 
-      <section
-        className="conversation"
-        aria-label="Conversation"
-        role="log"
-        aria-relevant="additions"
-      >
+      <div className="app-tabs">
+        <button onClick={() => setActiveTab("chat")}>
+          Chatbot
+        </button>
 
-        {messages.length === 0 && (
-          <p className="empty-message">
-            Try asking "How can I recognize a fake bank text?"
-          </p>
-        )}
+        <button onClick={() => setActiveTab("developer")}>
+          For Developers
+        </button>
+      </div>
+
+      {activeTab === "chat" && (
+        <>
+          <section
+            className="conversation"
+            aria-label="Conversation"
+            role="log"
+            aria-relevant="additions"
+          >
+
+          {messages.length === 0 && (
+            <p className="empty-message">
+              Try asking "How can I recognize a fake bank text?"
+            </p>
+          )}
 
                 {messages.map((message) => (
           <article key={message.id} className={`message message-${message.role}`}>
@@ -156,6 +170,13 @@ export default function App() {
         </button>
       </form>
       <div ref={conversationEndRef} />
+      </>
+      )}
+      {/* DEVELOPER PAGE */}
+      {activeTab === "developer" && (
+        <DeveloperPage />
+      )}
+
     </main>
   )
 }
