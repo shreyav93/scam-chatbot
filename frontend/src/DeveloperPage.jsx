@@ -307,24 +307,32 @@ export default function DeveloperPage() {
       {/* DATASET MANAGEMENT */}
       <section className="developer-section">
         <div className="developer-section-heading">
-          <div>
+        <div>
             <h3>Dataset Management</h3>
             <p>
-              Manage the trusted information used by the chatbot's
-              retrieval system.
+            Manage the  information used by the chatbot.
             </p>
-          </div>
+        </div>
 
-          <button
+        <div className="source-actions">
+            <button
+            type="button"
             onClick={() => {
-              cancelForm();
-              setShowAddForm(true);
-              setError("");
-              setSuccess("");
+                cancelForm();
+                setShowAddForm(true);
+                setError("");
+                setSuccess("");
             }}
-          >
-            + Add Source
-          </button>
+            >
+            + Add URL Source
+            </button>
+
+            <button
+            type="button"
+            >
+            + Upload File Source
+            </button>
+        </div>
         </div>
 
         {showAddForm && (
@@ -591,8 +599,7 @@ export default function DeveloperPage() {
         <h3>Data Ingestion</h3>
 
         <p>
-            Fetch trusted sources, extract webpage content, and generate
-            embeddings for the chatbot's knowledge base.
+            Ingest the data.
         </p>
 
         <button
@@ -641,10 +648,9 @@ export default function DeveloperPage() {
         )}
         </section>
 
-      {/* USAGE STATISTICS */}
+      {/* USAGE STATISTICS
       <section className="developer-section">
         <h3>Knowledge Base Statistics</h3>
-        <p>Monitor the current contents of your chatbot's knowledge base.</p>
 
         <div className="developer-stats">
           <div className="stat-card">
@@ -667,7 +673,7 @@ export default function DeveloperPage() {
             <p>Total Chunks</p>
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
