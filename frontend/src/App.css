@@ -56,6 +56,170 @@
   }
 }
 
+.app-tabs {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.app-tabs button {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.app-tabs button.active-tab {
+  border-bottom: 3px solid #25205c;
+  color: #25205c;
+}
+
+
+.developer-section-heading,
+.source-card-header,
+.dataset-toolbar,
+.source-actions,
+.source-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.source-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+}
+
+.source-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.source-form input,
+.source-form select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.source-form-actions,
+.source-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.dataset-toolbar {
+  margin: 20px 0;
+}
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.source-card {
+  padding: 18px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.source-card h4 {
+  margin: 0 0 5px;
+}
+
+.source-card p {
+  margin: 5px 0;
+}
+
+.source-card a {
+  display: block;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.source-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0;
+  font-size: 13px;
+  color: #777;
+}
+
+.source-status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.source-status.active {
+  background: #e4f5e9;
+  color: #176b36;
+}
+
+.source-status.inactive {
+  background: #eee;
+  color: #666;
+}
+
+.developer-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.stat-card {
+  padding: 18px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.stat-card h4 {
+  font-size: 26px;
+  margin: 0;
+}
+
+.stat-card p {
+  margin-bottom: 0;
+}
+
+.developer-error {
+  color: #b42318;
+}
+
+.developer-success {
+  color: #176b36;
+}
+
+.developer-note {
+  font-size: 13px;
+  color: #777;
+}
+
+@media (max-width: 600px) {
+  .developer-section-heading,
+  .source-card-header,
+  .dataset-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+
 #center {
   display: flex;
   flex-direction: column;
@@ -182,3 +346,4 @@
     border-right-color: var(--border);
   }
 }
+

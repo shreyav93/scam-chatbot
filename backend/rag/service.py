@@ -1,11 +1,10 @@
 import os
-import re
 import time
 from functools import lru_cache
 
 import numpy as np
 
-from . import guardrails
+from . import confidence, guardrails
 from .models import Chunk
 
 MIN_SCORE = 0.45   # tune with your test questions
@@ -40,6 +39,10 @@ Warning signs I notice:
 What to do next:
 - ...
 If the sources do not cover this, say: "My sources don't cover this."
+End with one final line, exactly one of:
+Source check: agree      (the sources say consistent things about this message)
+Source check: partial    (the sources only cover part of this message)
+Source check: conflict   (the sources disagree with each other)
 
 SOURCES:
 {context}
@@ -89,23 +92,28 @@ def generate(prompt, visitor_id):
 def answer(question, visitor_id="local"):
     hits = retrieve(question)
     if not hits:
-        return {"answer": NO_SOURCE_ANSWER, "sources": []}
+        return {"answer": NO_SOURCE_ANSWER, "sources": [], "confidence": confidence.no_support()}
 
     context = "\n\n".join(
         f"[{i + 1}] ({c.source.publisher}: {c.source.title})\n{c.text}"
         for i, (c, _) in enumerate(hits)
     )
-    text = generate(PROMPT.format(context=context, question=question), visitor_id).strip()
+    raw = generate(PROMPT.format(context=context, question=question), visitor_id).strip()
+    text, agreement = confidence.split_agreement(raw)
     if not text:
-        return {"answer": NO_SOURCE_ANSWER, "sources": []}
+        return {"answer": NO_SOURCE_ANSWER, "sources": [], "confidence": confidence.no_support()}
     if "don't cover this" in text.lower():
-        return {"answer": text, "sources": []}
-    cited = {int(n) for n in re.findall(r"\[(\d+)\]", text)}
-    cited = {n for n in cited if 1 <= n <= len(hits)}   # ignore invented numbers
+        return {"answer": text, "sources": [], "confidence": confidence.no_support()}
+    cited = {n for n in confidence.cited_numbers(text) if 1 <= n <= len(hits)}   # ignore invented numbers
+    conf, details = confidence.assess(
+        question, text, hits,
+        embed=lambda texts: list(_embedder().embed(texts)),
+        agreement=agreement,
+    )
     sources = [
         {"id": i + 1, "title": c.source.title, "publisher": c.source.publisher,
          "url": c.source.url, "snippet": c.text[:300],
-         "cited": (i + 1) in cited}
-        for i, (c, _) in enumerate(hits)
+         "cited": (i + 1) in cited, **detail}
+        for i, ((c, _), detail) in enumerate(zip(hits, details))
     ]
-    return {"answer": text, "sources": sources}
+    return {"answer": text, "sources": sources, "confidence": conf}

@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **o):
         manifest = json.loads((Path(__file__).parents[2] / "sources.json").read_text())
-        urls = {m["url"] for m in manifest}
+        #urls = {m["url"] for m in manifest}
         for m in manifest:
             Source.objects.update_or_create(url=m["url"], defaults={
                 "title": m["title"],
@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 "last_reviewed": m.get("last_reviewed") or None,
                 "active": True,
             })
-        Source.objects.exclude(url__in=urls).update(active=False)   # removed -> inactive
+        #Source.objects.exclude(url__in=urls).update(active=False)   # removed -> inactive
 
         model = TextEmbedding("BAAI/bge-small-en-v1.5")
         for s in Source.objects.filter(active=True):

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import DeveloperPage from "./DeveloperPage";
 
 async function getAnswer(question) {
   const res = await fetch('/api/ask/', {
@@ -12,11 +13,65 @@ async function getAnswer(question) {
   return data
 }
 
+const LEVEL_LABELS = {
+  high: 'High confidence',
+  medium: 'Medium confidence',
+  low: 'Low confidence',
+  none: 'Not rated',
+}
+
+const FACTOR_LABELS = {
+  quantity: 'Independent sources used',
+  relevance: 'How well sources match',
+  reliability: 'How trustworthy sources are',
+}
+
+function ConfidenceSummary({ confidence }) {
+  const { level, score, summary, factors, notes = [] } = confidence
+
+  return (
+    <section className={`confidence confidence-${level}`} aria-label="How well-supported this answer is">
+      <h2>How well-supported is this answer?</h2>
+      <p className="confidence-level">
+        <strong>{LEVEL_LABELS[level] ?? level}</strong>
+        {level !== 'none' && ` (${score} out of 100)`}
+      </p>
+      {level !== 'none' && (
+        <meter min={0} max={100} low={50} high={75} optimum={100} value={score}>
+          {score} out of 100
+        </meter>
+      )}
+      <p>{summary}</p>
+      <p className="confidence-caveat">
+        This rates how well my sources back the answer. It does not mean the message is safe.
+      </p>
+      {factors && (
+        <details>
+          <summary>Why this score?</summary>
+          <ul>
+            {Object.entries(FACTOR_LABELS).map(([key, label]) => (
+              <li key={key}>
+                <strong>{label}:</strong>{' '}
+                {key === 'quantity' ? factors[key].count : `${factors[key].score} out of 100`}.{' '}
+                {factors[key].detail}
+              </li>
+            ))}
+            {notes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  )
+}
+
 export default function App() {
   const[question, setQuestion] = useState('')
   const[messages, setMessages] = useState([])
   const[isLoading, setIsLoading] = useState(false)
   const[error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState("chat");
 
   const conversationEndRef = useRef(null)
 
@@ -61,6 +116,7 @@ export default function App() {
       const assistantMessage = {
         id: crypto.randomUUID(), role: 'assistant',
         text: data.answer, sources: data.sources ?? [],
+        confidence: data.confidence ?? null,
       }
 
       setMessages((previous) => [...previous, assistantMessage])
@@ -89,23 +145,36 @@ export default function App() {
         </p>
       </header>
 
-      <section
-        className="conversation"
-        aria-label="Conversation"
-        role="log"
-        aria-relevant="additions"
-      >
+      <div className="app-tabs">
+        <button onClick={() => setActiveTab("chat")}>
+          Chatbot
+        </button>
 
-        {messages.length === 0 && (
-          <p className="empty-message">
-            Try asking "How can I recognize a fake bank text?"
-          </p>
-        )}
+        <button onClick={() => setActiveTab("developer")}>
+          For Developers
+        </button>
+      </div>
+
+      {activeTab === "chat" && (
+        <>
+          <section
+            className="conversation"
+            aria-label="Conversation"
+            role="log"
+            aria-relevant="additions"
+          >
+
+          {messages.length === 0 && (
+            <p className="empty-message">
+              Try asking "How can I recognize a fake bank text?"
+            </p>
+          )}
 
                 {messages.map((message) => (
           <article key={message.id} className={`message message-${message.role}`}>
             <strong>{message.role === 'user' ? 'You' : 'Scam Support'}</strong>
             <p style={{ whiteSpace: 'pre-wrap' }}>{message.text}</p>
+            {message.confidence && <ConfidenceSummary confidence={message.confidence} />}
             {message.sources?.length > 0 && (
               <section aria-label="Sources used for this answer">
                 <h2>Sources</h2>
@@ -118,6 +187,12 @@ export default function App() {
                           {s.publisher}: {s.title}
                         </a>
                         {!s.cited && ' (also consulted)'}
+                        {s.authority && (
+                          <span className="source-authority">
+                            {' '}· {s.authority}
+                            {s.reliability_notes?.length > 0 && ` (${s.reliability_notes.join('; ')})`}
+                          </span>
+                        )}
                         <details><summary>Show the passage used</summary><p>{s.snippet}</p></details>
                       </li>
                     ))}
@@ -156,6 +231,13 @@ export default function App() {
         </button>
       </form>
       <div ref={conversationEndRef} />
+      </>
+      )}
+      {/* DEVELOPER PAGE */}
+      {activeTab === "developer" && (
+        <DeveloperPage />
+      )}
+
     </main>
   )
 }

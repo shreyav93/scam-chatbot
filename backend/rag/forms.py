@@ -1,4 +1,3 @@
-# chatbot/forms.py
 from django import forms
 
 
@@ -60,3 +59,13 @@ class IngestionForm(forms.Form):
           }
       ),
   )
+
+  def clean(self):
+    cleaned = super().clean()
+    has_file = bool(cleaned.get("file"))
+    has_text = bool((cleaned.get("raw_text") or "").strip())
+    if has_file == has_text:   # both or neither
+      raise forms.ValidationError(
+          "Provide either a file or pasted text, not both and not neither."
+      )
+    return cleaned
