@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
 from rag.views import ask
+from rag.views import upload_source_view
+from django.views.generic import RedirectView
 
 
 def health(request):
@@ -25,7 +27,9 @@ def health(request):
 
 
 urlpatterns = [
+    path("", RedirectView.as_view(url="/upload/", permanent=False)),
     path("admin/", admin.site.urls),
+    path("upload/", upload_source_view, name="upload_source"),
     path("api/health/", health),
     path("api/ask/", ask),
 ]
