@@ -7,6 +7,7 @@ trafilatura
 requests
 google-genai
 python-dotenv
+pypdf
 dj-database-url
 psycopg[binary]
 gunicorn
