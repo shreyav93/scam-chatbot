@@ -28,22 +28,8 @@ DATABASES = {
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-<<<<<<< HEAD
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+phgkz4=&pdv)lg)h=a7ef=09cdbg+elg2$v1x7$n$vdg2ps(e'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
-=======
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
->>>>>>> e64ac51adfde0968310117a3ada9438c185449ab
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
@@ -142,3 +128,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173", "http://127.0.0.1:5173",
     *[o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o],
 ]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
