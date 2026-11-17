@@ -7,7 +7,6 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
-from django.views.generic import RedirectView
 
 from rag import developer_views
 from rag.views import ask, upload_source_view
@@ -18,7 +17,7 @@ def health(request):
 
 
 urlpatterns = [
-    path("", RedirectView.as_view(url="/upload/", permanent=False)),
+    path("", lambda request: JsonResponse({"service": "SeniorShield API"})),
     path("admin/", admin.site.urls),
     path("upload/", upload_source_view, name="upload_source"),
     path("api/health/", health),

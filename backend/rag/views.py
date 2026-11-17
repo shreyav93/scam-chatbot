@@ -11,6 +11,8 @@ from .guardrails import MAX_INPUT_CHARS, LimitReached
 from .ingestion import ingest_upload
 from .service import answer
 
+from django.contrib.admin.views.decorators import staff_member_required
+
 logger = logging.getLogger(__name__)
 
 
@@ -33,7 +35,7 @@ def ask(request):
         logger.exception("Chatbot answer generation failed")
         return JsonResponse({"error": "Could not generate an answer."}, status=502)
 
-
+@staff_member_required
 def upload_source_view(request):
     result = error = None
     if request.method == "POST":
