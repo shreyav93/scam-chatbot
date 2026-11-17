@@ -32,4 +32,5 @@ urlpatterns = [
     path("api/developer/sources/<int:source_id>/", developer_views.update_source),
     path("api/developer/stats/", developer_views.get_dashboard_stats),
     path("api/developer/ingest/", developer_views.run_ingestion),
+    path("api/developer/sources/upload/",developer_views.upload_source,),
 ]

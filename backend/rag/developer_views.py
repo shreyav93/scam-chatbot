@@ -15,6 +15,8 @@ from io import StringIO
 import re
 
 from django.core.management import call_command
+from .forms import IngestionForm
+from .ingestion import ingest_upload
 
 
 def developer_required(view_func):
@@ -152,12 +154,18 @@ def create_source(request):
     url = data["url"].strip()
 
     if len(title) > 300 or len(publisher) > 100:
-        return JsonResponse({"error": "Title or publisher is too long."}, status=400)
+        return JsonResponse(
+            {"error": "Title or publisher is too long."},
+            status=400
+        )
 
     try:
         URLValidator()(url)
     except ValidationError:
-        return JsonResponse({"error": "Please enter a valid URL."}, status=400)
+        return JsonResponse(
+            {"error": "Please enter a valid URL."},
+            status=400
+        )
 
     try:
         source = Source.objects.create(
@@ -174,10 +182,39 @@ def create_source(request):
             status=409
         )
 
+    # Automatically ingest the newly added URL
+    ingestion_output = StringIO()
+    ingestion_errors = StringIO()
+
+    try:
+        call_command(
+            "ingest",
+            source_id=source.id,
+            stdout=ingestion_output,
+            stderr=ingestion_errors,
+        )
+
+        output = ingestion_output.getvalue()
+        errors = ingestion_errors.getvalue()
+
+        if "ingested:" in output:
+            message = "Source added and ingested successfully."
+        elif "unchanged:" in output:
+            message = "Source added. Its content was already up to date."
+        else:
+            message = "Source added, but ingestion may have failed."
+
+    except Exception as e:
+        output = ""
+        errors = str(e)
+        message = "Source added, but automatic ingestion failed."
+
     return JsonResponse({
         "success": True,
         "source": serialize_source(source),
-        "message": "Source added successfully. Run ingestion to make its content available to the chatbot."
+        "message": message,
+        "ingestion_output": output,
+        "ingestion_errors": errors,
     }, status=201)
 
 
@@ -323,3 +360,38 @@ def run_ingestion(request):
             "output": stdout.getvalue(),
             "errors": stderr.getvalue(),
         }, status=500)
+
+@require_POST
+@developer_required
+def upload_source(request):
+    form = IngestionForm(request.POST, request.FILES)
+
+    if not form.is_valid():
+        print("UPLOAD FORM ERRORS:", form.errors)
+        return JsonResponse({
+            "success": False,
+            "error": str(form.errors),
+            "errors": form.errors,
+        }, status=400)
+
+    try:
+        source = ingest_upload(form.cleaned_data)
+
+        return JsonResponse({
+            "success": True,
+            "message": f"Successfully uploaded {source.title}.",
+            "source": serialize_source(source),
+        })
+
+    except ValueError as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e),
+        }, status=400)
+
+    except Exception:
+        logger.exception("Document upload failed")
+        return JsonResponse({
+            "success": False,
+            "error": "Document ingestion failed.",
+        }, status=500)    
