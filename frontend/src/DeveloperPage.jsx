@@ -17,17 +17,24 @@ function getCookie(name) {
   return null;
 }
 
+
 async function apiRequest(endpoint, options = {}) {
   const csrfToken = getCookie("csrftoken");
+
+  const headers = {
+    ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+    ...options.headers,
+  };
+
+  // Only set JSON Content-Type for requests that aren't file uploads
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const response = await fetch(`${API}${endpoint}`, {
     credentials: "include",
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
-      ...options.headers,
-    },
+    headers,
   });
 
   const data = await response.json().catch(() => ({}));
@@ -55,6 +62,7 @@ export default function DeveloperPage() {
   const [success, setSuccess] = useState("");
   const [ingesting, setIngesting] = useState(false);
   const [ingestionResult, setIngestionResult] = useState(null);
+  const [showUploadForm, setShowUploadForm] = useState(false);
 
   const [loginForm, setLoginForm] = useState({
     username: "",
@@ -188,7 +196,7 @@ export default function DeveloperPage() {
         });
 
         setSuccess(
-          "Source added. Run ingestion to make its content available to the chatbot."
+          "Source added."
         );
       }
 
@@ -242,6 +250,30 @@ export default function DeveloperPage() {
     setIngesting(false);
   }
   }
+
+  async function handleUpload(event) {
+  event.preventDefault();
+
+  const formData = new FormData(event.target);
+
+  try {
+    const data = await apiRequest("/sources/upload/", {
+      method: "POST",
+      body: formData,
+    });
+
+    setSuccess(data.message);
+    setError("");
+
+    // Refresh your existing source list and dashboard stats here.
+    // Use the same functions you call after adding a source.
+
+    event.target.reset();
+  } catch (err) {
+    setError(err.message);
+    setSuccess("");
+  }
+}
 
   if (loading) {
     return <p>Loading developer portal...</p>;
@@ -314,6 +346,58 @@ export default function DeveloperPage() {
             </p>
         </div>
 
+        {showUploadForm && (
+            <form onSubmit={handleUpload} className="source-form">
+                <h3>Upload a Source</h3>
+
+                <input
+                name="title"
+                placeholder="Document Title"
+                required
+                />
+
+                <input
+                name="publisher"
+                placeholder="Publisher"
+                required
+                />
+
+                <input
+                name="category"
+                placeholder="Category"
+                />
+
+                <input
+                name="channel"
+                placeholder="Channel"
+                />
+
+                <label>Upload PDF, TXT, or CSV</label>
+                <input
+                name="file"
+                type="file"
+                accept=".pdf,.txt,.csv"
+                />
+
+                <label>Or paste text</label>
+                <textarea
+                name="raw_text"
+                placeholder="Paste source text here..."
+                />
+
+                <div>
+                <button type="submit">Upload Source</button>
+
+                <button
+                    type="button"
+                    onClick={() => setShowUploadForm(false)}
+                >
+                    Cancel
+                </button>
+                </div>
+            </form>
+            )}
+
         <div className="source-actions">
             <button
             type="button"
@@ -329,8 +413,14 @@ export default function DeveloperPage() {
 
             <button
             type="button"
+            onClick={() => {
+                cancelForm();
+                setShowUploadForm(!showUploadForm);
+                setError("");
+                setSuccess("");
+            }}
             >
-            + Upload File Source
+            + Upload File
             </button>
         </div>
         </div>
@@ -596,18 +686,16 @@ export default function DeveloperPage() {
 
       {/* DATA INGESTION */}
         <section className="developer-section">
-        <h3>Data Ingestion</h3>
+        {/* <h3>Data Ingestion</h3> */}
 
-        <p>
-            Ingest the data.
-        </p>
+       
 
         <button
             type="button"
             onClick={handleIngest}
             disabled={ingesting}
         >
-            {ingesting ? "Ingesting..." : "Run Ingestion"}
+            {ingesting ? "Refreshing..." : "Refresh Sources"}
         </button>
 
         {ingestionResult && (

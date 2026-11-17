@@ -18,13 +18,12 @@ class IngestionForm(forms.Form):
       ),
   )
   url = forms.URLField(
-      widget=forms.URLInput(
-          attrs={
-              "class": "form-control",
-              "placeholder": "https://example.com/source",
-          }
-      )
-  )
+    required=False,
+    widget=forms.URLInput(attrs={
+        "class": "form-control",
+        "placeholder": "Optional URL"
+    })
+    )
   category = forms.CharField(
       max_length=50,
       required=False,

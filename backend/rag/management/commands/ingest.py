@@ -17,8 +17,10 @@ class Command(BaseCommand):
     help = "Sync sources.json into the DB, then fetch, chunk and embed changed pages."
 
     def add_arguments(self, p):
-        p.add_argument("--force", action="store_true", help="re-embed even if unchanged")
-
+        p.add_argument("--force", action="store_true",
+                    help="re-embed even if unchanged")
+        p.add_argument("--source-id", type=int,
+                    help="Only ingest a specific source")
     def handle(self, *args, **o):
         manifest = json.loads((Path(__file__).parents[2] / "sources.json").read_text())
         #urls = {m["url"] for m in manifest}
@@ -34,13 +36,46 @@ class Command(BaseCommand):
         #Source.objects.exclude(url__in=urls).update(active=False)   # removed -> inactive
 
         model = TextEmbedding("BAAI/bge-small-en-v1.5")
-        for s in Source.objects.filter(active=True):
+        sources = Source.objects.filter(active=True)
+
+        if o.get("source_id"):
+            sources = sources.filter(id=o["source_id"])
+
+        for s in sources:
+            if not s.url:
+                self.stdout.write(
+                    f"SKIP (no URL; uploaded document): {s.title}"
+                )
+                continue
             try:
-                r = requests.get(s.url, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+                # r = requests.get(s.url, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+                # r.raise_for_status()
+                r = requests.get(
+                    s.url,
+                    headers={
+                        "User-Agent": (
+                            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/130.0.0.0 Safari/537.36"
+                        ),
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                        "Accept-Language": "en-US,en;q=0.9",
+                    },
+                    timeout=20,
+                )
                 r.raise_for_status()
                 text = trafilatura.extract(r.text)
+            # except requests.RequestException as e:
+            #     self.stderr.write(f"SKIP ({e.__class__.__name__}): {s.url}")
+            #     continue
             except requests.RequestException as e:
-                self.stderr.write(f"SKIP ({e.__class__.__name__}): {s.url}")
+                if isinstance(e, requests.HTTPError):
+                    self.stderr.write(
+                        f"SKIP (HTTPError {e.response.status_code}): {s.url}"
+                    )
+                    self.stderr.write(f"Response: {e.response.text[:300]}")
+                else:
+                    self.stderr.write(f"SKIP ({e}): {s.url}")
                 continue
             if not text:
                 self.stderr.write(f"SKIP (fetch failed): {s.url}"); continue
