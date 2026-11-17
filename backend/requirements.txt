@@ -7,3 +7,7 @@ trafilatura
 requests
 google-genai
 python-dotenv
+dj-database-url
+psycopg[binary]
+gunicorn
+whitenoise
