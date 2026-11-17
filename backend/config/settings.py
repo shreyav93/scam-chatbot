@@ -31,7 +31,7 @@ DATABASES = {
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["seniorshield-z13m.onrender.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["seniorshielding2340.onrender.com", "localhost", "127.0.0.1"]
 
 
 # Application definition
