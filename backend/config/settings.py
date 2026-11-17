@@ -30,9 +30,13 @@ DATABASES = {
 SECRET_KEY = 'django-insecure-+phgkz4=&pdv)lg)h=a7ef=09cdbg+elg2$v1x7$n$vdg2ps(e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-ALLOWED_HOSTS = ['seniorshield-z13m.onrender.com']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
